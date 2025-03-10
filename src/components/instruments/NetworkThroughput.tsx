@@ -3,60 +3,82 @@ import { ApexOptions } from "apexcharts";
 import { useEffect, useState } from "react";
 
 export default function NetworkThroughput() {
-    const [data, setData] = useState<{ time: number; send: number; receive: number }[]>([]);
+  const [data, setData] = useState<{ time: number; send: number; receive: number }[]>([]);
     
-      useEffect(() => {
-        const interval = setInterval(() => {
-          setData((prevData) => {
-            const newTime = prevData.length > 0 ? prevData[prevData.length - 1].time + 1 : 0;
-            const newSend = Math.floor(Math.random() * 101);
-            const newReceive = Math.floor(Math.random() * 101);
-            
-            const updatedData = [...prevData, { time: newTime, send: newSend, receive: newReceive }];
-            return updatedData.slice(-60); 
-          });
-        }, 1000);
-    
-        return () => clearInterval(interval);
-      }, []);
-    
-      const options: ApexOptions = {
-        chart: {
-          type: "line",
-          animations: { enabled: false },
-          toolbar: { show: false },
-        },
-        xaxis: {
-          title: { text: "Seconds" },
-          max: 60,
-          labels: {
-            formatter: (value) => (value === "1" ? "0" : value === "60" ? "60" : ""),
-          },
-          axisTicks: { show: false },
-          axisBorder: { show: false },
-        },
-        yaxis: {
-          title: { text: "Mbps" },
-          max: 150,
-        },
-        stroke: { 
-            curve: "smooth",
-            width: 1.5
-         },
-        colors: ["#FA432A", "#3B3BFF"],
-      };
-    
-      const series = [
-        { name: "Send", data: data.map((d) => d.send) },
-        { name: "Receive", data: data.map((d) => d.receive) },
-      ];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setData((prevData) => {
+        const newTime = prevData.length > 0 ? prevData[prevData.length - 1].time + 1 : 0;
+        const newSend = Math.floor(Math.random() * 101);
+        const newReceive = newSend * -1 - 10;
+        
+        const updatedData = [...prevData, { time: newTime, send: newSend, receive: newReceive }];
+        return updatedData.slice(-60); 
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const options: ApexOptions = {
+    chart: {
+      type: "area",
+      animations: { enabled: false },
+      toolbar: { show: false },
+      zoom: { enabled: false },
       
-      const latestSend = data[data.length - 1]?.send || 0;
-      const latestReceive = data[data.length - 1]?.receive || 0;
+    },
+    xaxis: {
+      categories: data.map((d) => d.time.toString()),
+      title: { text: "Seconds" },
+      tickAmount: 2,
+      labels: { show: false },
+      axisTicks: { show: false },
+      axisBorder: { show: false },
+      max: 60
+    },
+    yaxis: {
+      title: { text: "Mbps" },
+      max: 150,
+      min: -150, 
+      axisTicks: { show: false },
+      axisBorder: { show: false },
+      labels: { show: false },
+    },
+    grid: {
+      show: false,
+    },
+    stroke: { 
+      curve: "straight",
+      width: 1.5 
+    },
+    dataLabels: { 
+      enabled: false 
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shadeIntensity: 1,
+        inverseColors: false,
+        opacityFrom: 0.7,
+        opacityTo: 0.7,
+        stops: [0, 100]
+      },
+    },
+    colors: ["#00BFFF", "#FF4500"],
+  };
+
+  const series = [
+    { name: "Send", data: data.map((d) => d.send) },
+    { name: "Receive", data: data.map((d) => d.receive) },
+  ];
+
+  const latestSend = data[data.length - 1]?.send || 0;
+  const latestReceive = data[data.length - 1]?.receive * -1|| 0;
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]">
-      <div className="px-5 pt-5 bg-white shadow-default rounded-2xl pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6">
+      <div className="px-5 pt-5 bg-white shadow-default rounded-2xl pb-20 dark:bg-gray-900 sm:px-6 sm:pt-6">
         <div className="flex justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
@@ -69,7 +91,7 @@ export default function NetworkThroughput() {
             <Chart 
                 options={options} 
                 series={series} 
-                type="line" 
+                type="area" 
                 height={350} />
           </div>
         </div>
